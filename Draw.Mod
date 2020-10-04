@@ -1,5 +1,4 @@
-MODULE Draw; (*NW 29.6.88 / 12.11.94 / 18.11.2013*)
-             (*MS 1.2019 adapted for Unicode*)
+MODULE Draw; (*NW 29.6.88 / 12.11.94 / 18.11.2013 / AP 7.2.20*)
 
   IMPORT Files, Fonts, Viewers, Texts, Oberon,
     TextFrames, MenuViewers, Graphics, GraphicFrames;
@@ -22,7 +21,7 @@ MODULE Draw; (*NW 29.6.88 / 12.11.94 / 18.11.2013*)
       S: Texts.Scanner;
       text: Texts.Text;
   BEGIN Texts.OpenScanner(S, Oberon.Par.text, Oberon.Par.pos); Texts.Scan(S);
-    IF (S.class = Texts.Char) & (S.codepoint = ORD("^")) THEN
+    IF (S.class = Texts.Char) & (S.c = "^") THEN
       Oberon.GetSelection(text, beg, end, t);
       IF t >= 0 THEN Texts.OpenScanner(S, text, beg); Texts.Scan(S) END
     END ;
@@ -46,7 +45,7 @@ MODULE Draw; (*NW 29.6.88 / 12.11.94 / 18.11.2013*)
   PROCEDURE GetArg(VAR S: Texts.Scanner);
     VAR T: Texts.Text; beg, end, time: LONGINT;
   BEGIN Texts.OpenScanner(S, Oberon.Par.text, Oberon.Par.pos); Texts.Scan(S);
-    IF (S.class = Texts.Char) & (S.codepoint = ORD("^")) THEN
+    IF (S.class = Texts.Char) & (S.c = "^") THEN
       Oberon.GetSelection(T, beg, end, time);
       IF time >= 0 THEN Texts.OpenScanner(S, T, beg); Texts.Scan(S) END
     END
@@ -78,7 +77,7 @@ MODULE Draw; (*NW 29.6.88 / 12.11.94 / 18.11.2013*)
     VAR S: Texts.Scanner; FM: Graphics.FontMsg;
   BEGIN GetArg(S);
     IF S.class = Texts.Name THEN
-      FM.fnt := Fonts.This(S.s);
+      FM.fnt := Fonts.Load(S.s);
       IF FM.fnt # NIL THEN GraphicFrames.Change(GraphicFrames.Selected(), FM) END
     END
   END ChangeFont;

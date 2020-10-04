@@ -1,14 +1,13 @@
-MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013*)
-                      (*CP 12.2018 changed to adopt NL instead of CR *)
-                      (*MS 1.2019 adapted for Unicode*)
-
-  IMPORT SYSTEM, Display, Viewers, Input, Fonts, Texts, Graphics, Oberon, MenuViewers;
+MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013 / 27.8.2018 / AP 9.3.20 Extended Oberon*)
+  IMPORT SYSTEM, Display, Viewers, Input, Fonts, Texts, Graphics, Oberon;
 
   CONST (*update message ids*)
     drawobj = 1; drawobjs = 2; drawobjd = 3;
     drawnorm = 4; drawsel = 5; drawdel = 6;
 
     markW = 5;
+
+    CR = Input.CR;
 
   TYPE
     Frame* = POINTER TO FrameDesc;
@@ -211,19 +210,19 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013*)
 
   PROCEDURE CaptionCopy(F: Frame;
       x1, y1: INTEGER; T: Texts.Text; beg, end: LONGINT): Graphics.Caption;
-    VAR codepoint: INTEGER;
+    VAR ch: CHAR;
       dx, w, x2, y2, w1, h1: INTEGER;
       cap: Graphics.Caption;
       pat: INTEGER;
       R: Texts.Reader;
-  BEGIN Texts.Write(W, 0AX);
+  BEGIN Texts.Write(W, CR);
     NEW(cap); cap.len := end - beg;
     cap.pos := Graphics.T.len + 1; cap.do := Graphics.CapMethod;
-    Texts.OpenReader(R, T, beg); Texts.ReadUnicode(R, codepoint); W.fnt := R.fnt; W.col := R.col; w := 0;
+    Texts.OpenReader(R, T, beg); Texts.Read(R, ch); W.fnt := R.fnt; W.col := R.col; w := 0;
     cap.x := x1 - F.x; cap.y := y1 - F.y + R.fnt.minY;
     WHILE beg < end DO
-      Fonts.GetUniPat(R.fnt, codepoint, dx, x2, y2, w1, h1, pat);
-      INC(w, dx); INC(beg); Texts.WriteUnicode(W, codepoint); Texts.ReadUnicode(R, codepoint)
+      Fonts.GetPat(R.fnt, ch, dx, x2, y2, w1, h1, pat);
+      INC(w, dx); INC(beg); Texts.Write(W, ch); Texts.Read(R, ch)
     END ;
     cap.w := w; cap.h := W.fnt.height; cap.col := W.col;
     Texts.Append(Graphics.T, W.buf); Graphics.Add(F.graph, cap);
@@ -323,40 +322,34 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013*)
   END Edit;
 
   PROCEDURE NewCaption(F: Frame; col: INTEGER; font: Fonts.Font);
-  BEGIN Texts.Write(W, 0AX);
+  BEGIN Texts.Write(W, CR);
     NEW(newcap); newcap.x := F.mark.x - F.x; newcap.y := F.mark.y - F.y + font.minY;
     newcap.w := 0; newcap.h := font.height; newcap.col := col;
     newcap.pos := Graphics.T.len + 1; newcap.len := 0; newcap.do := Graphics.CapMethod;
     Graphics.Add(F.graph, newcap); W.fnt := font; ; Mark(F, 1)
   END NewCaption;
 
-  PROCEDURE InsertChar(F: Frame; codepoint: INTEGER);
+  PROCEDURE InsertChar(F: Frame; ch: CHAR);
     VAR w1, h1: INTEGER; DM: DispMsg;
   BEGIN DM.graph := F.graph;
-    Fonts.GetUniPat(W.fnt, codepoint, DM.w, DM.x1, DM.y1, w1, h1, DM.pat); DEC(DM.y1, W.fnt.minY);
+    Fonts.GetPat(W.fnt, ch, DM.w, DM.x1, DM.y1, w1, h1, DM.pat); DEC(DM.y1, W.fnt.minY);
     IF newcap.x + newcap.w + DM.w + F.x < F.X1 THEN
-      Viewers.Broadcast(DM); INC(newcap.w, DM.w); INC(newcap.len, Texts.UnicodeWidth(codepoint)); Texts.WriteUnicode(W, codepoint)
+      Viewers.Broadcast(DM); INC(newcap.w, DM.w); INC(newcap.len); Texts.Write(W, ch)
     END ;
     Texts.Append(Graphics.T, W.buf)
   END InsertChar;
 
   PROCEDURE DeleteChar(F: Frame);
-    VAR w1, h1, charlen, codepoint, pos: INTEGER; ch: CHAR;
+    VAR w1, h1: INTEGER; ch: CHAR; pos: LONGINT;
       DM: DispMsg; R: Texts.Reader;
   BEGIN DM.graph := F.graph;
     IF newcap.len > 0 THEN
-      charlen := 0; (*backspace*)
-      pos := Graphics.T.len;
-      REPEAT INC(charlen);
-        Texts.OpenReader(R, Graphics.T, pos-charlen);
-        Texts.Read(R, ch);
-      UNTIL (ch < 80X) OR (ch >= 0C0X); (* skip over continuation *)
-      Texts.OpenReader(R, Graphics.T, pos-charlen);
-      Texts.ReadUnicode(R, codepoint);
-      IF codepoint >= ORD(" ") THEN
-        Fonts.GetUniPat(R.fnt, codepoint, DM.w, DM.x1, DM.y1, w1, h1, DM.pat);
-        DEC(newcap.w, DM.w); DEC(newcap.len, charlen); DEC(DM.y1, R.fnt.minY);
-        Viewers.Broadcast(DM); Texts.Delete(Graphics.T, pos-charlen, pos, TBuf)
+      pos := Graphics.T.len; Texts.OpenReader(R, Graphics.T, pos-1);  (*backspace*)
+      Texts.Read(R, ch);
+      IF ch >= " " THEN
+        Fonts.GetPat(R.fnt, ch, DM.w, DM.x1, DM.y1, w1, h1, DM.pat);
+        DEC(newcap.w, DM.w); DEC(newcap.len); DEC(DM.y1, R.fnt.minY);
+        Viewers.Broadcast(DM); Texts.Delete(Graphics.T, pos-1, pos, TBuf)
       END
     END
   END DeleteChar;
@@ -383,14 +376,14 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013*)
           x := M.X - (M.X - G.x) MOD 4; y := M.Y - (M.Y - G.y) MOD 4;
           IF M.keys # {} THEN Edit(G, x, y, M.keys) ELSE Oberon.DrawMouse(Crosshair, x, y) END
         ELSIF M.id = Oberon.consume THEN
-          IF M.codepoint = 7FH THEN (*DEL*)
+          IF M.ch = 7FX THEN (*DEL*)
             Erase(G); Graphics.Delete(G.graph); Mark(G, 1)
-          ELSIF (M.codepoint >= 20H) THEN
-            IF newcap # NIL THEN InsertChar(G, M.codepoint); Mark(G, 1)
+          ELSIF (M.ch >= 20X) & (M.ch < 7FX) THEN
+            IF newcap # NIL THEN InsertChar(G, M.ch); Mark(G, 1)
             ELSIF G.marked THEN
-              Defocus(G); Deselect(G); NewCaption(G, M.col, M.fnt); InsertChar(G, M.codepoint)
+              Defocus(G); Deselect(G); NewCaption(G, M.col, M.fnt); InsertChar(G, M.ch)
             END
-          ELSIF (M.codepoint = ORD(08X)) & (newcap # NIL) THEN DeleteChar(G); Mark(G, 1)
+          ELSIF (M.ch = 8X) & (newcap # NIL) THEN DeleteChar(G); Mark(G, 1)
           END
         END
       | UpdateMsg:
@@ -424,7 +417,7 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013*)
           END
       | Oberon.SelectionMsg: GetSelection(G, M.text, M.beg, M.end, M.time)
       | Oberon.CopyMsg: Oberon.RemoveMarks(G.X, G.Y, G.W, G.H); Defocus(G); NEW(G1); G1^ := G^; M.F := G1
-      | MenuViewers.ModifyMsg: G.Y := M.Y; G.H := M.H; Restore(G)
+      | Viewers.ViewerMsg: G.Y := M.Y; G.H := M.H; Restore(G)
       END
     END
   END Handle;
@@ -463,7 +456,7 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013*)
     CASE M OF DrawMsg:
       x := obj.x + M.x; y := obj.y + M.y; w := obj.w; h := obj.h; f := M.f;
       IF (x+w > f.X) & (x < f.X1) & (y+h > f.Y) & (y < f.Y1) THEN
-        col := Display.white;
+        col := obj.col;
         IF (M.mode = 0) & obj.selected OR (M.mode = 1) THEN
           ReplPattern(f, col, Display.grey, x, y, w, h, Display.replace)
         ELSIF M.mode IN {0, 2} THEN ReplConst(f, col, x, y, w, h, Display.replace)
@@ -474,25 +467,25 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013*)
   END DrawLine;
 
   PROCEDURE DrawCaption(obj: Graphics.Object; VAR M: Graphics.Msg);
-    VAR x, y, dx, x0, x1, y0, y1, w, h, w1, h1, col, codepoint: INTEGER;
+    VAR x, y, dx, x0, x1, y0, y1, w, h, w1, h1, col: INTEGER;
       f: Frame;
-      pat: INTEGER; fnt: Fonts.Font;
+      ch: CHAR; pat: INTEGER; fnt: Fonts.Font;
       R: Texts.Reader;
   BEGIN
     CASE M OF DrawMsg:
       x := obj.x + M.x; y := obj.y + M.y; w := obj.w; h := obj.h; f := M.f;
       IF (f.X <= x) & (x <= f.X1) & (f.Y <= y) & (y+h <= f.Y1) THEN
         IF x+w > f.X1 THEN w := f.X1-x END ;
-        Texts.OpenReader(R, Graphics.T, obj(Graphics.Caption).pos); Texts.ReadUnicode(R, codepoint);
+        Texts.OpenReader(R, Graphics.T, obj(Graphics.Caption).pos); Texts.Read(R, ch);
         IF M.mode = 0 THEN
-          IF codepoint >= ORD(" ") THEN
-            fnt := R.fnt; x0 := x; y0 := y - fnt.minY;
-            REPEAT Fonts.GetUniPat(fnt, codepoint, dx, x1, y1, w1, h1, pat);
+          IF ch >= " " THEN
+            fnt := R.fnt; x0 := x; y0 := y - fnt.minY; col := obj.col;
+            REPEAT Fonts.GetPat(fnt, ch, dx, x1, y1, w1, h1, pat);
               IF x0+x1+w1 <= f.X1 THEN
-                Display.CopyPattern(col, pat, x0+x1, y0+y1, Display.paint); INC(x0, dx); Texts.ReadUnicode(R, codepoint)
-              ELSE codepoint := 0
+                Display.CopyPattern(col, pat, x0+x1, y0+y1, Display.paint); INC(x0, dx); Texts.Read(R, ch)
+              ELSE ch := 0X
               END
-            UNTIL codepoint < ORD(" ");
+            UNTIL ch < " ";
             IF obj.selected THEN ReplConst(f, Display.white, x, y, w, h, Display.invert) END
           END
         ELSIF M.mode IN {1, 2} THEN ReplConst(f, Display.white, x, y, w, h, Display.invert)
@@ -529,7 +522,7 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013*)
   END Open;
 
 BEGIN DW := Display.Width - 8; DH := Display.Height - 8; CL := 0;
-  Texts.OpenWriter(W);
+  Texts.OpenWriter(W); NEW(TBuf); Texts.OpenBuf(TBuf);
   tack := SYSTEM.ADR($0707 4122 1408 1422 4100$);
   dotted := SYSTEM.ADR($2004 0000 1111 1111 0000 0000 0000 0000 0000 0000$);
   dotted1 := SYSTEM.ADR($2004 0000 1111 1111 0000 0000 4444 4444 0000 0000$);
