@@ -73,6 +73,10 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013 / 27.8.2018 / AP 9.3.20 Extended
     Restore, Focus, Selected, This, Draw, DrawNorm, Erase,
     DrawObj, EraseObj, Change, Defocus, Deselect, Macro, Open*)
 
+  (* begin-section-description
+## ---------- Oberon Message Handling
+  end-section-description *)
+
   PROCEDURE SetChangeMark(F: Frame; col: INTEGER); (*set mark in corner of frame*)
   BEGIN
     IF F.H > 16 THEN
