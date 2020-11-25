@@ -1,16 +1,16 @@
 k,v1,v2
-package,Draw,v5.0.0
+package,Draw,v5.0.20180827
 from,github.com/io-core,whenever
 license,PROJECTOBERON,NW
 doc,stdlib,provides line-oriented drawing primitives and a vector drawing tool.
+r,[core]/Modules,v5.0.0
 r,[core]/Oberon,v5.0.0
 r,[core]/Edit,v5.0.0
 r,[core]/Files,v5.0.0
-r,[core]/Modules,v5.0.0
-p,GraphTool.Mod,a3dd119b04be509218b1f81eb5e60a49555bf74d25f43ffab2b0ecf31163583b
-p,Rectangles.Mod,545bfc91a200b0a1abeea2198d8f6cc17434faaa7a5188cb919e39299a116a5c
-p,Curves.Mod,8af719d4f8267c6946adf6c8a58f351565442aaef2dfd8b1ca010d5254b5ff7b
-p,Graphics.Mod,4cb6b28aa17a819825d57f3a34a902ced7dd7987b8f68fb124a699685c631fde
-p,MacroTool.Mod,9b8d42d8c63a6a7815189e636cfc5344efbab5ad0872125b7bb196000ac5be21
-p,Draw.Mod,cb31f0e0f608c04773dfb05e5cc55a0ca11ed1b8a0520e07f8e0e5f45860c9d5
-p,GraphicFrames.Mod,d502f54f1dff943edd74ed7eaa0d6ebc662650a6b338371e0ae9cf9fc41dfba2
+p,Draw.Mod,7009585c52f0bd07a67a5e3d9dbfe88a0079d07b630cba2723eed72bb9c70a24
+p,Graphics.Mod,22cf2e57b1576966593a68d20f5cecdd6a3c43282658e1e8fb5f8af22d5246c4
+p,MacroTool.Mod,5f158470102b0e5a8a38659afe4b17b353fd46a07b457684a0e8f48f7fc463ef
+p,GraphicFrames.Mod,dfaa68c2d5a3313990ea10d055315b0c9a26cb987e72778026e6cba1b04bc92d
+p,GraphTool.Mod,cc5ebb6cec2845ef5f7066d052c22523ff92337d898eb8c5698d5bc4153fcd44
+p,Rectangles.Mod,e187550d5b645d61fc2e0a80ab98e6030e809724927385142c19f5dad4a11659
+p,Curves.Mod,4efa3b61094883b1ae9e2563bc4dbf8c56e59216fb6abb59b9293659d096bd29

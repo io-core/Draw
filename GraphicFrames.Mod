@@ -1,13 +1,11 @@
-MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013 / 27.8.2018 / AP 9.3.20 Extended Oberon*)
-  IMPORT SYSTEM, Display, Viewers, Input, Fonts, Texts, Graphics, Oberon;
+MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013 / 27.8.2018*)
+  IMPORT SYSTEM, Display, Viewers, Input, Fonts, Texts, Graphics, Oberon, MenuViewers;
 
   CONST (*update message ids*)
     drawobj = 1; drawobjs = 2; drawobjd = 3;
     drawnorm = 4; drawsel = 5; drawdel = 6;
 
     markW = 5;
-
-    CR = Input.CR;
 
   TYPE
     Frame* = POINTER TO FrameDesc;
@@ -72,10 +70,6 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013 / 27.8.2018 / AP 9.3.20 Extended
   (*Exported procedures:
     Restore, Focus, Selected, This, Draw, DrawNorm, Erase,
     DrawObj, EraseObj, Change, Defocus, Deselect, Macro, Open*)
-
-  (* begin-section-description
-## ---------- Oberon Message Handling
-  end-section-description *)
 
   PROCEDURE SetChangeMark(F: Frame; col: INTEGER); (*set mark in corner of frame*)
   BEGIN
@@ -219,7 +213,7 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013 / 27.8.2018 / AP 9.3.20 Extended
       cap: Graphics.Caption;
       pat: INTEGER;
       R: Texts.Reader;
-  BEGIN Texts.Write(W, CR);
+  BEGIN Texts.Write(W, 0AX);
     NEW(cap); cap.len := end - beg;
     cap.pos := Graphics.T.len + 1; cap.do := Graphics.CapMethod;
     Texts.OpenReader(R, T, beg); Texts.Read(R, ch); W.fnt := R.fnt; W.col := R.col; w := 0;
@@ -326,7 +320,7 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013 / 27.8.2018 / AP 9.3.20 Extended
   END Edit;
 
   PROCEDURE NewCaption(F: Frame; col: INTEGER; font: Fonts.Font);
-  BEGIN Texts.Write(W, CR);
+  BEGIN Texts.Write(W, 0AX);
     NEW(newcap); newcap.x := F.mark.x - F.x; newcap.y := F.mark.y - F.y + font.minY;
     newcap.w := 0; newcap.h := font.height; newcap.col := col;
     newcap.pos := Graphics.T.len + 1; newcap.len := 0; newcap.do := Graphics.CapMethod;
@@ -421,7 +415,7 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013 / 27.8.2018 / AP 9.3.20 Extended
           END
       | Oberon.SelectionMsg: GetSelection(G, M.text, M.beg, M.end, M.time)
       | Oberon.CopyMsg: Oberon.RemoveMarks(G.X, G.Y, G.W, G.H); Defocus(G); NEW(G1); G1^ := G^; M.F := G1
-      | Viewers.ViewerMsg: G.Y := M.Y; G.H := M.H; Restore(G)
+      | MenuViewers.ModifyMsg: G.Y := M.Y; G.H := M.H; Restore(G)
       END
     END
   END Handle;
@@ -526,7 +520,7 @@ MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013 / 27.8.2018 / AP 9.3.20 Extended
   END Open;
 
 BEGIN DW := Display.Width - 8; DH := Display.Height - 8; CL := 0;
-  Texts.OpenWriter(W); NEW(TBuf); Texts.OpenBuf(TBuf);
+  Texts.OpenWriter(W);
   tack := SYSTEM.ADR($0707 4122 1408 1422 4100$);
   dotted := SYSTEM.ADR($2004 0000 1111 1111 0000 0000 0000 0000 0000 0000$);
   dotted1 := SYSTEM.ADR($2004 0000 1111 1111 0000 0000 4444 4444 0000 0000$);
