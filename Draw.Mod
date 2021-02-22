@@ -1,10 +1,15 @@
+(* begin-module-short-description
+provides a 2d line drawing document interface to Oberon.
+end-module-short-description *)
+
 MODULE Draw; (*NW 29.6.88 / 12.11.94 / 18.11.2013*)
              (*MS 1.2019 adapted for Unicode*)
 
-  IMPORT Files, Fonts, Viewers, Texts, Oberon,
-    TextFrames, MenuViewers, Graphics, GraphicFrames;
+  IMPORT Files, Fonts, Viewers, Texts, Oberon, TextFrames, MenuViewers, Graphics, GraphicFrames;
 
   CONST Menu = "System.Close  System.Copy  System.Grow  Draw.Delete  Draw.Ticks  Draw.Restore  Draw.Store";
+
+  TYPE
 
   VAR W: Texts.Writer;
 

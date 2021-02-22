@@ -2,6 +2,9 @@ MODULE GraphTool;  (*NW  8.8.2013*)
   IMPORT Files, Texts, Oberon;
 
   CONST Context = 0; Line = 1; Caption = 2; Macro = 3; Rectangles = 4;
+
+  TYPE
+
   VAR W: Texts.Writer;
 
   PROCEDURE DecGraph*;
