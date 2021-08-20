@@ -1,3 +1,7 @@
+(* begin-module-short-description
+provides for graphical composition of line drawing primitives.
+end-module-short-description *)
+
 MODULE MacroTool;  (*NW  6.8.2013*)
   IMPORT Texts, Oberon, Graphics, GraphicFrames;
   VAR W: Texts.Writer;

@@ -1,3 +1,7 @@
+(* begin-module-short-description
+provides line drawing primitives.
+end-module-short-description *)
+
 MODULE Graphics;   (*NW 21.12.89 / 18.11.201 / 8.4.2016*)
                    (*MS 1.2019 adapted for Unicode*)
 

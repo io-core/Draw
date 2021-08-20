@@ -1,3 +1,7 @@
+(* begin-module-short-description
+maps user interaction onto line drawing graphics frames.
+end-module-short-description *)
+
 MODULE GraphicFrames; (*NW 18.4.88 / 18.11.2013*)
                       (*CP 12.2018 changed to adopt NL instead of CR *)
                       (*MS 1.2019 adapted for Unicode*)
